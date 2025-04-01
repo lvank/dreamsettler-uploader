@@ -1,0 +1,24 @@
+<form name="submit_page_form">
+{% if errors and errors["general"] %}
+<div class="alert alert-danger" role="alert">
+  {{ errors["general"] }}
+</div>
+{% endif %}
+<label>Create a new</label>
+<br>
+<input type="radio" id="dszed" name="pagetype" value="0" class="form-check-input"{{ ' checked' if (pars and pars['pagetype'] == '0') or not pars }}>
+<label for="dszed" class="form-check-label">username on dreamsettler.zed</label>
+<br>
+<input type="radio" id="owntld" name="pagetype" value="1" class="form-check-input"{{ ' checked' if pars and pars['pagetype'] == '1'}}>
+<label for="owntld" class="form-check-label">website (ending in .zed, .som, .nap)</label>
+<br>
+{% if errors and errors["pagename"] %}
+<div class="alert alert-danger" role="alert">
+  {{ errors["pagename"] }}
+</div>
+{% endif %}
+<label for="pagename">Username or domain (lowercase, max 64 chars):</label>
+<input type="text" name="pagename" class="form-control" value="{{ pars['pagename'] if pars and pars['pagename'] else ''}}" />
+<br>
+<input type="submit" hx-post="{{ url_for('manager.create') }}" hx-target="#create_page" hx-swap="innerHTML" class="btn btn-primary" value="create">
+</form>

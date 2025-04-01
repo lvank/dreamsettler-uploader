@@ -1,0 +1,25 @@
+services:
+  uploader:
+    image: dsuploader:latest
+    restart: unless-stopped
+    env_file:
+      - ./data/.env.local
+    volumes:
+      - ./:/usr/src/app
+      - ./pages:/ds_pages
+      - ./data:/data
+    command: gunicorn --log-level info --bind 0.0.0.0:8000 -w 1 'main:make_wsgi_app()'
+    ports:
+      - 8000:8000
+  sftp:
+    image: dsuploader:latest
+    restart: unless-stopped
+    env_file:
+      - ./data/.env.local
+    volumes:
+      - ./data:/data
+      - ./pages:/ds_pages
+    ports:
+      - 5001:5001
+    command: python main.py sftp 
+

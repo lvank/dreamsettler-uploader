@@ -1,0 +1,8 @@
+__pycache__/
+.py[doc]
+**/__pycache__/
+data/
+pages/
+instance/
+host_key
+host_key.pub

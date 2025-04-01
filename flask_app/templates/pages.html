@@ -1,0 +1,22 @@
+<p><h3>Your pages:</h3>
+  {% with messages = get_flashed_messages() %}
+  {% if messages %}
+    <div class="alert alert-info" role="alert">
+    {% for message in messages %}
+      {{ message }}<br>
+    {% endfor %}
+    </div>
+  {% endif %}
+{% endwith %}
+    {% if ds_pages|length > 0 %}
+      {% for page in ds_pages %}
+        <li>{{ page.get_uri() }} (<a href="#" hx-get="{{ url_for('manager.pages') }}?delete_pagetype={{ page.page_type|urlencode }}&delete_pagename={{ page.page_name|urlencode }}" hx-target="#your_pages">delete</a>)</li>
+      {% endfor %}
+    {% if delete_page[0] and delete_page[1] %}
+      <p><b>Warning!</b> This will delete <b>{{ delete_page[1] }}</b>, but only if it's empty.</p>
+      <a hx-post="{{ url_for('manager.delete') }}" hx-target="#your_pages" class="btn btn-danger" hx-vals='{ "delete_pagetype": {{delete_page[0]|tojson}}, "delete_pagename": {{delete_page[1]|tojson}} }'>Delete it</a>
+      <a hx-get="{{ url_for('manager.pages') }}" hx-target="#your_pages" class="btn btn-secondary">Actually, never mind</a>
+    {% endif %}
+    {% else %}
+    <span>None yet!</span>
+    {% endif %}
