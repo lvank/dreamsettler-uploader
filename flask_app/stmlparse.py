@@ -35,6 +35,24 @@ class TextNode:
 	def __init__(self, text):
 		self.text = text
 
+class STMLStyleShadow:
+	"""Helper class to construct an STML element shadow. CSS needs all shadow attributes as a single property."""
+	def __init__(self):
+		self.offset_x = 0
+		self.offset_y = 0
+		self.blur_radius = 0
+		self.spread_radius = 0
+		self.color = 'none'
+		self.alpha = 0
+
+	def changed(self):
+		return self.color != 'none'
+
+	def __str__(self):
+		alpha = int(255 * self.alpha / 100.0)
+		# Construct a box-shadow format.
+		return f'{self.offset_x}px {self.offset_y}px {self.blur_radius}px {self.spread_radius}px {self.color}{alpha:02x}'
+
 class STMLParser(NodeVisitor):
 	def __init__(self):
 		self.current_node = None
@@ -156,8 +174,15 @@ def stml_rewrite_tag(node: STMLNode):
 
 def stml_attrib_css(page_root, node: STMLNode):
 	class_attributes = {}
-	def _a(key, value):
-		class_attributes.update({key: value})
+	shadow = STMLStyleShadow()  # prepare a shadow in case we come across shadow attributes
+	def _a(key, value, specificness=0):
+		# lower specificness = attribute will overwrite, 0 is most specific
+		if key in class_attributes:
+			current = class_attributes.get(key)
+			if specificness > current[1]:
+				# we already have a more specific attribute, ignore this update
+				return
+		class_attributes.update({key: [value, specificness]})
 	for k, v in node.attributes.items():
 		if k == 'backgroundColor':
 			_a('background-color', v)
@@ -190,13 +215,13 @@ def stml_attrib_css(page_root, node: STMLNode):
 		elif k == 'marginRight':
 			_a('margin-right', f'{v}px')
 		elif k == 'margin':
-			_a('margin', f'{v}px')
+			_a('margin', f'{v}px', 2)
 		elif k == 'marginVertical':
-			_a('margin-top', f'{v}px')
-			_a('margin-bottom', f'{v}px')
+			_a('margin-top', f'{v}px', 1)
+			_a('margin-bottom', f'{v}px', 1)
 		elif k == 'marginHorizontal':
-			_a('margin-left', f'{v}px')
-			_a('margin-right', f'{v}px')
+			_a('margin-left', f'{v}px', 1)
+			_a('margin-right', f'{v}px', 1)
 		elif k == 'padding':
 			_a('padding', f'{v}px')
 		elif k == 'align':
@@ -225,16 +250,35 @@ def stml_attrib_css(page_root, node: STMLNode):
 			elif v == 'none':
 				_a('display', 'none')
 		elif k == 'x':
-			_a('left', f'{v}px !important')
+			_a('left', f'{v}px')
+			if 'y' not in class_attributes:
+				_a('top', f'0px')
 		elif k == 'y':
-			_a('top', f'{v}px !important')
+			_a('top', f'{v}px')
+			if 'x' not in class_attributes:
+				_a('left', f'0px')
 		elif k == 'orientation':
 			_a('display', 'flex')
 			if v == 'horizontal':
 				_a('flex-direction', 'row')
+				_a('justify-content', 'space-evenly')
 			elif v == 'vertical':
 				_a('flex-direction', 'column')
-	return [f'{k}: {v}' for k, v in class_attributes.items()]
+		elif k == 'shadowAlpha':
+			if v.isdigit():
+				shadow.alpha = int(v)
+		elif k == 'shadowColor':
+			shadow.color = v
+		elif k == 'shadowBlur':
+			shadow.blur_radius = v
+		elif k == 'shadowX':
+			shadow.offset_x = v
+		elif k == 'shadowY':
+			shadow.offset_y = v
+	if shadow.changed():
+		# apply all shadow attributes as box-shadow in css
+		_a('box-shadow', str(shadow))
+	return [f'{k}: {v[0]}' for k, v in class_attributes.items()]
 
 def _rewrite_ds_url(url, page_root):
 	fs = urlparse(url.replace('\\', '/'))
