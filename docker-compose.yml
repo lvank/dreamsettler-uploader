@@ -3,10 +3,10 @@ services:
     image: dsuploader:latest
     restart: unless-stopped
     env_file:
-      - ./data/.env
+      - /srv/data/.env
     volumes:
       - /mnt/dspages:/ds_pages
-      - ./data:/data
+      - /srv/data:/data
     command: gunicorn --bind 0.0.0.0:8000 -w 1 'main:make_wsgi_app()'
     ports:
       - 127.0.0.1:8000:8000
@@ -14,9 +14,9 @@ services:
     image: dsuploader:latest
     restart: unless-stopped
     env_file:
-      - ./data/.env
+      - /srv/data/.env
     volumes:
-      - ./data:/data
+      - /srv/data:/data
       - /mnt/dspages:/ds_pages
     ports:
       - 5001:5001
