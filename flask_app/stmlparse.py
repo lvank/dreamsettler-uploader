@@ -251,11 +251,11 @@ def stml_attrib_css(page_root, node: STMLNode):
 				_a('display', 'none')
 		elif k == 'x':
 			_a('left', f'{v}px')
-			if 'y' not in class_attributes:
+			if 'top' not in class_attributes:
 				_a('top', f'0px')
 		elif k == 'y':
 			_a('top', f'{v}px')
-			if 'x' not in class_attributes:
+			if 'left' not in class_attributes:
 				_a('left', f'0px')
 		elif k == 'orientation':
 			_a('display', 'flex')
