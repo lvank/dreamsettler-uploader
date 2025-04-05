@@ -11,8 +11,17 @@ p {
     margin: 0;
 }
 
+ul {
+    list-style-position: inside;
+}
+
 div {
+    position: relative;
     display: flex;
     flex-direction: column;
     padding: 5px;
+}
+
+#stml_parser_root {
+    padding: 0;
 }

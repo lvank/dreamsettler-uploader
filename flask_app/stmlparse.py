@@ -109,7 +109,7 @@ def visit_stml_node(page_root, style, node):
 		if not tag == 'img':
 			attribs['href'] = _rewrite_ds_url(href, page_root)
 	if 'id' in node.attributes:
-		attribs['id'] = '#' + node.attributes.get('id')
+		attribs['id'] = node.attributes.get('id')
 	if 'style' in node.attributes:
 		attribs['class'] = node.attributes.get('style')
 	attrib_text = ' '.join([f'{k}="{v}"' for k, v in attribs.items()])
@@ -118,7 +118,7 @@ def visit_stml_node(page_root, style, node):
 	html = f'<{tag}{attrib_text}>'
 	if tag == 'body':
 		# contain the whole stml body in a div root
-		html += '<div id="#stml_parser_root">\n'
+		html += '<div id="stml_parser_root">\n'
 	if node.self_closing:
 		# html can't put hrefs on linked images, wrap in <a>
 		if href and tag == 'img':
@@ -185,13 +185,29 @@ def stml_attrib_css(page_root, node: STMLNode):
 			_a('margin-top', f'{v}px')
 		elif k == 'marginBottom':
 			_a('margin-bottom', f'{v}px')
+		elif k == 'marginLeft':
+			_a('margin-left', f'{v}px')
+		elif k == 'marginRight':
+			_a('margin-right', f'{v}px')
 		elif k == 'margin':
 			_a('margin', f'{v}px')
+		elif k == 'marginVertical':
+			_a('margin-top', f'{v}px')
+			_a('margin-bottom', f'{v}px')
+		elif k == 'marginHorizontal':
+			_a('margin-left', f'{v}px')
+			_a('margin-right', f'{v}px')
 		elif k == 'padding':
 			_a('padding', f'{v}px')
 		elif k == 'align':
 			_a('text-align', v)
-			_a('align-self', v)
+			if v == 'left':
+				_a('align-self', 'start')
+			elif v == 'right':
+				_a('align-self', 'end')
+			else:
+				# not always correct
+				_a('align-self', v)
 		elif k == 'textSize':
 			_a('font-size', f'{v}px')
 		elif k == 'backgroundImage':
@@ -202,10 +218,16 @@ def stml_attrib_css(page_root, node: STMLNode):
 		elif k == 'display':
 			if v == 'floe':
 				_a('position', 'absolute')
+			elif v == 'anchored':
+				_a('position', 'fixed')
+			elif v == 'buoyed':
+				_a('position', 'sticky')
+			elif v == 'none':
+				_a('display', 'none')
 		elif k == 'x':
-			_a('margin-left', f'{v}px !important')
+			_a('left', f'{v}px !important')
 		elif k == 'y':
-			_a('margin-top', f'{v}px !important')
+			_a('top', f'{v}px !important')
 		elif k == 'orientation':
 			_a('display', 'flex')
 			if v == 'horizontal':
