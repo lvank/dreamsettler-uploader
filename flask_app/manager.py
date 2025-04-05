@@ -3,12 +3,12 @@ from flask import Blueprint, render_template, flash
 from flask_login import login_required, current_user
 from flask_app import db, SFTP_ROOT, dlog
 from flask_app.models import DSPage
+from flask_app.stmlparse import re_pagename
 from sqlalchemy.exc import IntegrityError
 import re
 import os
 
 re_username = re.compile(r'^[a-z][a-z0-9_]{2,64}$')
-re_pagename = re.compile(r'^[a-z][a-z0-9-]{2,60}\.(zed|som|nap)$')
 bp = Blueprint('manager', __name__, template_folder='templates', url_prefix='/manager')
 
 @bp.route('/')

@@ -1,7 +1,10 @@
 from parsimonious.grammar import Grammar
 from parsimonious.nodes import NodeVisitor
+from urllib.parse import urlparse, urlunparse
 import re
 import sys
+
+re_pagename = re.compile(r'^[a-z][a-z0-9-]{2,60}\.(zed|som|nap)$')
 
 grammar = Grammar(r"""
 	stml_page      = _ doctype (_ tag _)+
@@ -94,12 +97,12 @@ def visit_stml_node(page_root, style, node):
 		if style:
 			node.children.append(style)
 	attribs = {}
-	css = stml_attrib_css(node)
+	css = stml_attrib_css(page_root, node)
 	if css:
 		attribs['style'] = '; '.join(css)
 	src = node.attributes.get('source')
 	if src:
-		attribs['src'] = _rewrite_ds_url(src)
+		attribs['src'] = _rewrite_ds_url(src, page_root)
 	href = node.attributes.get('to')
 	if href:
 		href = _rewrite_ds_url(href, page_root)
@@ -128,12 +131,12 @@ def visit_stml_node(page_root, style, node):
 	html += f'</{tag}>'
 	return html
 
-def visit_sss_node(node: STMLNode):
+def visit_sss_node(page_root, node: STMLNode):
 	classes = {}
 	for style in node.children:
 		if not isinstance(style, STMLNode):
 			continue
-		class_body = '; '.join(stml_attrib_css(style))
+		class_body = '; '.join(stml_attrib_css(page_root, style))
 		classes[style.attributes['id']] = class_body
 	return '<style type="text/css">\n' + '\n'.join([f'.{k} {{ {v} }}' for k, v in classes.items()]) + '</style>'
 
@@ -151,7 +154,7 @@ def stml_rewrite_tag(node: STMLNode):
 		'details': None,
 	}.get(node.tag, node.tag)
 
-def stml_attrib_css(node: STMLNode):
+def stml_attrib_css(page_root, node: STMLNode):
 	class_attributes = {}
 	def _a(key, value):
 		class_attributes.update({key: value})
@@ -192,7 +195,7 @@ def stml_attrib_css(node: STMLNode):
 		elif k == 'textSize':
 			_a('font-size', f'{v}px')
 		elif k == 'backgroundImage':
-			_a('background-image', f'url(\'{_rewrite_ds_url(v)}\')')
+			_a('background-image', f'url(\'{_rewrite_ds_url(page_root, v)}\')')
 		elif k == 'fashion':
 			_a('font-weight', v)
 		elif k == 'display':
@@ -211,10 +214,15 @@ def stml_attrib_css(node: STMLNode):
 	return [f'{k}: {v}' for k, v in class_attributes.items()]
 
 def _rewrite_ds_url(url, page_root=None):
-	fs = url.replace('\\', '/')
-	if not page_root:
-		return f'./{fs.lstrip('/')}'
-	return f'{page_root}/{fs}'
+	fs = urlparse(url.replace('\\', '/'))
+	first_segment = fs.path.split('/')[0]
+	if re_pagename.match(first_segment):
+		# Starts with domain name, absolute path
+		fs = fs._replace(path=f'{page_root}/{fs.path}')
+	else:
+		# Does not start with domain name, relative path - strip the leftmost slash
+		fs = fs._replace(path=f'{fs.path.lstrip('/')}')
+	return urlunparse(fs)
 
 
 def stml_to_html(page_root, document):
@@ -227,7 +235,7 @@ def stml_to_html(page_root, document):
 	# preprocess certain tags so we can nest them in the html later
 	for node in parser.root_tags:
 		if node.tag == 'sss':
-			style = visit_sss_node(node)
+			style = visit_sss_node(page_root, node)
 			break
 	# find stml tag and parse
 	for node in parser.root_tags:
