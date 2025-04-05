@@ -195,7 +195,8 @@ def stml_attrib_css(page_root, node: STMLNode):
 		elif k == 'textSize':
 			_a('font-size', f'{v}px')
 		elif k == 'backgroundImage':
-			_a('background-image', f'url(\'{_rewrite_ds_url(page_root, v)}\')')
+			print(v)
+			_a('background-image', f'url(\'{_rewrite_ds_url(v, page_root)}\')')
 		elif k == 'fashion':
 			_a('font-weight', v)
 		elif k == 'display':
@@ -213,7 +214,7 @@ def stml_attrib_css(page_root, node: STMLNode):
 				_a('flex-direction', 'column')
 	return [f'{k}: {v}' for k, v in class_attributes.items()]
 
-def _rewrite_ds_url(url, page_root=None):
+def _rewrite_ds_url(url, page_root):
 	fs = urlparse(url.replace('\\', '/'))
 	first_segment = fs.path.split('/')[0]
 	if re_pagename.match(first_segment):

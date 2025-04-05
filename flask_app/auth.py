@@ -3,7 +3,7 @@ from urllib.parse import urlencode
 import requests
 import secrets
 from flask_login import login_user, logout_user, current_user
-from flask_app import db, dlog
+from flask_app import db
 from flask_app.models import User
 
 bp = Blueprint('auth', __name__, template_folder='templates', url_prefix='/auth')
@@ -90,7 +90,6 @@ def oauth2_callback(provider):
     guild_id = current_app.config['ALLOWED_GUILD']
     guild_q = requests.get(apiurl.format(f'/users/@me/guilds/{guild_id}/member'),
                             headers={'Accept': 'application/json', 'Authorization': f'Bearer {oauth2_token}'})
-    dlog(guild_q.content)
     if guild_q.status_code != 200:
         abort(401, description='Not a member of the Dreamsettler Discord')
     
