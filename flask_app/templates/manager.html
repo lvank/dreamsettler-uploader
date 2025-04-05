@@ -24,6 +24,7 @@
       <p id="create_page">
         {% include 'create_page_button.html' %}
       </p>
+      <a class="btn btn-primary" href="{{ url_for('stmlrender.pages') }}">Browse pages (WIP)</a>
       <p id="your_pages" hx-trigger="load" hx-get="{{ url_for('manager.pages') }}"></p>
       </p>
       <p>

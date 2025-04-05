@@ -20,5 +20,5 @@
 <label for="pagename">Username or domain (lowercase, max 64 chars):</label>
 <input type="text" name="pagename" class="form-control" value="{{ pars['pagename'] if pars and pars['pagename'] else ''}}" />
 <br>
-<input type="submit" hx-post="{{ url_for('manager.create') }}" hx-target="#create_page" hx-swap="innerHTML" class="btn btn-primary" value="create">
+<input type="submit" hx-post="{{ url_for('manager.create') }}" hx-target="#create_page" hx-swap="innerHTML" class="btn btn-primary" value="Create page">
 </form>
