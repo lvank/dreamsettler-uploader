@@ -38,15 +38,15 @@ class TextNode:
 class STMLStyleShadow:
 	"""Helper class to construct an STML element shadow. CSS needs all shadow attributes as a single property."""
 	def __init__(self):
-		self.offset_x = 0
-		self.offset_y = 0
+		self.offset_x = 4
+		self.offset_y = 4
 		self.blur_radius = 0
 		self.spread_radius = 0
-		self.color = 'none'
+		self.color = '#000000'
 		self.alpha = 0
 
 	def changed(self):
-		return self.color != 'none'
+		return self.alpha > 0
 
 	def __str__(self):
 		alpha = int(255 * self.alpha / 100.0)
