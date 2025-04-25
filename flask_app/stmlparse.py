@@ -132,7 +132,7 @@ def visit_stml_node(page_root, style, node):
 	if href:
 		href = _rewrite_ds_url(href, page_root)
 		if not tag == 'img':
-			attribs['href'] = _rewrite_ds_url(href, page_root)
+			attribs['href'] = href
 	if 'id' in node.attributes:
 		attribs['id'] = node.attributes.get('id')
 	if 'style' in node.attributes:
