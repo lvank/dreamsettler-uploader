@@ -17,7 +17,7 @@ grammar = Grammar(r"""
 			   
 	tagname        = ~"[a-z]+"
 	ws             = ~"\\s*"m
-	text           = ~"[^<>]+"m
+	text           = ~r".+(?=</>)"ism
 	attribute      = ~"[a-zA-Z]+" "=" ~"[^ />]+"
 	_              = ws
 """)
