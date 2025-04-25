@@ -33,7 +33,7 @@ def pages(path):
                     return stml_parse(file.read())
             response += f'<li><a href="./{f}">{f}</a></li>\n'
         return make_response(response)
-    return send_from_directory(SFTP_ROOT, path)
+    return send_from_directory(SFTP_ROOT, path, max_age=604800)
     
 def stml_parse(stml_str):
     html = stml_to_html('/browse', stml_str)
