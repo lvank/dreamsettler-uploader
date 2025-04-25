@@ -68,14 +68,14 @@ def create():
         return render_template('create_page_form.html', errors=errors) 
     pagetype = int(pagetype)
     
-    pagename = flask.request.values.get('pagename')
+    pagename = flask.request.values.get('pagename').strip()
     if pagetype == 0:
         if len(pagename) < 3:
             errors['pagename'] = 'Username is too short (3 chars minimum)'
         elif not re_username.match(pagename):
             errors['pagename'] = 'Username must contain only letters/numbers and start with a number'
     elif pagetype == 1:
-        if pagename == 'dreamsettler.zed':
+        if pagename in ('dreamsettler.zed', 'somnius.som'):
             errors['pagename'] = 'No!!!!! >:('
         elif not re_pagename.match(pagename):
             errors['pagename'] = 'Domain must start with a letter, have only letters/numbers/dashes, and end in .zed/som/nap'
