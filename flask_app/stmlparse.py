@@ -121,6 +121,7 @@ def visit_stml_node(page_root, style, node):
 		node.children.append('<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>')
 		if style:
 			node.children.append(style)
+		node.children.append('<script>let FF_FOUC_FIX;</script>')
 	attribs = {}
 	css = stml_attrib_css(page_root, node)
 	if css:
