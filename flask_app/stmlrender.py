@@ -14,6 +14,8 @@ def pages(path='./'):
     rpath = os.path.realpath(os.path.join(SFTP_ROOT, path))
     if not re.match(f'^{SFTP_ROOT}($|/)', rpath):
         return make_response('File not found', 404)
+    if not os.path.exists(rpath):
+        return make_response('File not found', 404)
     if re.search(r'\.stml?$', rpath):
         with open(rpath) as file:
             return stml_parse(file.read())
@@ -24,7 +26,7 @@ def pages(path='./'):
                 stml_path = os.path.realpath(os.path.join(rpath, f))
                 with open(stml_path) as file:
                     return stml_parse(file.read())
-            response += f'<li><a href="{f}/">{f}</a></li>\n'
+            response += f'<li><a href="{f}">{f}</a></li>\n'
         return make_response(response)
     return send_from_directory(SFTP_ROOT, path)
     
