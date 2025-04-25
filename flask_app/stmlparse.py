@@ -264,8 +264,35 @@ def stml_attrib_css(page_root, node: STMLNode):
 		elif k == 'backgroundImage':
 			print(v)
 			_a('background-image', f'url(\'{_rewrite_ds_url(v, page_root)}\')')
+		elif k == 'backgroundRepeat':
+			bg_repeat = None
+			if v == 'x':
+				bg_repeat = 'repeat-x'
+			elif v == 'y':
+				bg_repeat = 'repeat-y'
+			elif v == 'none':
+				bg_repeat = 'no-repeat'
+			elif v == 'xy':
+				bg_repeat = 'repeat'
+			# TODO slice
+			if bg_repeat:
+				_a('background-repeat', bg_repeat)
 		elif k == 'fashion':
-			_a('font-weight', v)
+			fashion_vals = v.split(',')
+			for fashion in fashion_vals:
+				fashion=fashion.strip()
+				if fashion == 'bold':
+					_a('font-weight', 'bold')
+				elif fashion == 'italic':
+					_a('font-style', 'italic')
+				elif fashion == 'upper':
+					_a('text-transform', 'uppercase')
+				elif fashion == 'lower':
+					_a('text-transform', 'lowercase')
+				elif fashion == 'line':
+					_a('text-decoration', 'underline')
+				elif fashion == 'strike':
+					_a('text-decoration', 'line-through')
 		elif k == 'display':
 			if v == 'floe':
 				_a('position', 'absolute')
