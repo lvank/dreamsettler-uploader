@@ -6,18 +6,22 @@ import sys
 
 re_pagename = re.compile(r'^[a-z][a-z0-9-]{2,60}\.(zed|som|nap)$')
 
+#uncomment to help debug grammar
+#from parsimonious.nodes import Node
+#Node.__repr__ = lambda x: f'({x.expr_name}): {x.text.strip() if x.expr_name != "ws" else ""}'
+
 grammar = Grammar(r"""
-	stml_page      = _ doctype (_ tag _)+
+	stml_page      = _ doctype tag+ _
 	doctype        = ~"<!doctype stml>"i
-	tag            = (tag_self / tag_body)
-	tag_body       = tag_open _ (tag / tag_self / text)* _ tag_close
+	tag            = _ (tag_self / tag_body) _
+	tag_body       = tag_open _ (tag / text)* _ tag_close
 	tag_close      = ~"</>"
 	tag_open       = ~"<" _ tagname _ (attribute _)* _ ">"
 	tag_self       = ~"<" _ tagname _ (attribute _)* _ "/>"
 			   
 	tagname        = ~"[a-z]+"
 	ws             = ~"\\s*"m
-	text           = ~r".+(?=</>)"ism
+	text           = ~".*?(?=<\\s*[a-z\\/])"is
 	attribute      = ~"[a-zA-Z]+" "=" ~"[^ />]+"
 	_              = ws
 """)
@@ -62,8 +66,8 @@ class STMLParser(NodeVisitor):
 		return None
 
 	def visit_stml_page(self, node, pars):
-		(_, _, tags) = pars
-		for (_, tag, _) in tags:
+		(_, _, tags, _) = pars
+		for tag in tags:
 			if tag:
 				self.root_tags.append(tag)
 	
@@ -72,7 +76,8 @@ class STMLParser(NodeVisitor):
 		return {name.text: value.text}
 	
 	def visit_tag(self, node, children):
-		return self.lift_child(node, children)
+		(_, tag, _) = children
+		return tag[0]
 	
 	def visit_tag_open(self, node, pars, self_closing=False):
 		(_, _, tagname, _, attributes, _, _) = pars
