@@ -117,6 +117,8 @@ def visit_stml_node(page_root, style, node):
 		return ''
 	if tag == 'head':
 		node.children.append('<link rel="stylesheet" href="/static/ds.css">')
+		node.children.append('<link rel="preconnect" href="https://fonts.googleapis.com">')
+		node.children.append('<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>')
 		if style:
 			node.children.append(style)
 	attribs = {}
@@ -176,6 +178,24 @@ def stml_rewrite_tag(node: STMLNode):
 		'soul': None,
 		'details': None,
 	}.get(node.tag, node.tag)
+
+def stml_rewrite_font(font: str):
+	return {
+		'edita': "'Times New Roman', Times, serif",
+		'roma': "'Noto Sans', sans-serif",
+		'dream': "Audiowide, monospace",
+		'toronto': "'Noto Sans', sans-serif",
+		'letter': "Helvetica, sans-serif",
+		'loos': "Quantico, monospace",
+		'capital': '"Six Caps", monospace',
+		'cutz': 'Slackey, sans-serif',
+		'mister': "'Imperial Script', sans-serif",
+		'noble': "'Jersey 15', monospace",
+		'hypno': "Tiny5, monospace",
+		'uni': "'Jersey 15', monospace",
+		'arkansas': 'Tagesschrift, serif',
+		'mystica': "'Jacquard 12', serif",
+	}.get(font, "Arial, Helvetica, sans-serif")
 
 def stml_attrib_css(page_root, node: STMLNode):
 	class_attributes = {}
@@ -260,6 +280,10 @@ def stml_attrib_css(page_root, node: STMLNode):
 		elif k == 'y':
 			_a('top', f'{v}px')
 			_a('left', f'0px', 100)
+		elif k == 'z':
+			_a('z-index', v)
+		elif k == 'font':
+			_a('font-family', stml_rewrite_font(v))
 		elif k == 'orientation':
 			_a('display', 'flex')
 			if v == 'horizontal':
@@ -293,7 +317,6 @@ def _rewrite_ds_url(url, page_root):
 		# Does not start with domain name, relative path - strip the leftmost slash
 		fs = fs._replace(path=f'{fs.path.lstrip('/')}')
 	return urlunparse(fs)
-
 
 def stml_to_html(page_root, document):
 	parser = STMLParser()
